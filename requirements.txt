@@ -1,0 +1,15 @@
+asgiref
+Django
+django-cors-headers
+djangorestframework
+djangorestframework-simplejwt
+PyJWT
+pytz
+sqlparse
+psycopg2-binary
+python-dotenv
+
+# Paquetes recomendados para manejo geoespacial y/o geocodificación:
+shapely     # para operaciones geométricas (distancias, intersecciones, etc.)
+geopy       # para geocodificación si se requiere
+pyproj      # para transformaciones de coordenadas
