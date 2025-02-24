@@ -9,6 +9,7 @@ sqlparse
 psycopg2-binary
 python-dotenv
 Pillow
+django-axes
 
 # Paquetes recomendados para manejo geoespacial y/o geocodificación:
 shapely     # para operaciones geométricas (distancias, intersecciones, etc.)
