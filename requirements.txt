@@ -8,6 +8,7 @@ pytz
 sqlparse
 psycopg2-binary
 python-dotenv
+Pillow
 
 # Paquetes recomendados para manejo geoespacial y/o geocodificación:
 shapely     # para operaciones geométricas (distancias, intersecciones, etc.)
