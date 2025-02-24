@@ -1,55 +1,49 @@
 from pathlib import Path
 from datetime import timedelta
 import os
-
-# Si usas dotenv para variables de entorno
 from dotenv import load_dotenv
 
+# Cargar variables de entorno
 load_dotenv()
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+# Base path del proyecto
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv(
-    "SECRET_KEY", "django-insecure-#cj$4nfe#5mv2+jf39o(kun3@w1wsx+jxko#=fshcv5ye264m3"
-)
+# Seguridad
+SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-#cj$4nfe#5mv2+jf39o(kun3@w1wsx+jxko#=fshcv5ye264m3")
+DEBUG = os.getenv("DEBUG", "True") == "True"
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# Hosts permitidos (ajusta esto en producción)
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
 
-ALLOWED_HOSTS = ["*"]
-
-# Application definition
+# Aplicaciones instaladas
 INSTALLED_APPS = [
-    # Django apps
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    # GeoDjango para soporte geoespacial
-    "django.contrib.gis",
-    # Terceros
+    "django.contrib.gis",  # Soporte GeoDjango
     "rest_framework",
     "rest_framework_simplejwt",
     "corsheaders",
-    # Tus apps
+    "axes",
+    # Apps personalizadas
     "accounts",
     "feed",
     "garage",
     "routes",
     "marketplace_bikes",
     "marketplace_clothes",
-    "api",  # En caso de que tengas esta app global
-    "axes",
+    "api",
 ]
 
+# Middlewares
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
-    "corsheaders.middleware.CorsMiddleware",  # Asegúrate de colocar corsheaders antes de CommonMiddleware
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -58,11 +52,14 @@ MIDDLEWARE = [
     "axes.middleware.AxesMiddleware",
 ]
 
-AXES_FAILURE_LIMIT = 5  # Bloquear tras 5 intentos fallidos
-AXES_COOLOFF_TIME = 1  # Tiempo de espera antes de desbloquear (en horas)
+# Configuración de Axes (protección contra ataques de fuerza bruta)
+AXES_FAILURE_LIMIT = 5
+AXES_COOLOFF_TIME = 1  # Horas
 
+# Configuración de rutas
 ROOT_URLCONF = "iberomoto.urls"
 
+# Configuración de templates
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
@@ -79,9 +76,10 @@ TEMPLATES = [
     },
 ]
 
+# Configuración de WSGI
 WSGI_APPLICATION = "iberomoto.wsgi.application"
 
-# Base de datos con PostGIS para GeoDjango
+# Configuración de la base de datos con PostgreSQL + PostGIS
 DATABASES = {
     "default": {
         "ENGINE": "django.contrib.gis.db.backends.postgis",
@@ -96,34 +94,27 @@ DATABASES = {
 # Usuario personalizado
 AUTH_USER_MODEL = "accounts.CustomUser"
 
-# Password validation
+# Validadores de contraseña
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
-    },
+    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
+    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
+    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
+    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
-# Internationalization
+# Configuración de idioma y zona horaria
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "UTC"
 USE_I18N = True
 USE_TZ = True
 
-# Static files
+# Archivos estáticos
 STATIC_URL = "static/"
 
+# Configuración de claves automáticas
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# Django REST Framework + SimpleJWT
+# Configuración de Django REST Framework y JWT
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
@@ -142,17 +133,34 @@ REST_FRAMEWORK = {
 }
 
 # Configuración de SimpleJWT
-from datetime import timedelta
-
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
     "ROTATE_REFRESH_TOKENS": True,  # Regenerar refresh tokens para evitar reutilización
     "BLACKLIST_AFTER_ROTATION": True,  # Invalidar tokens antiguos
-    "SIGNING_KEY": api_settings.SIGNING_KEY,  # Usa una clave segura
+    "SIGNING_KEY": os.getenv("JWT_SECRET", SECRET_KEY),  # Usa la clave de entorno o SECRET_KEY
     "ALGORITHM": "HS256",
 }
 
-# CORS
-CORS_ALLOW_ALL_ORIGINS = True
+# Configuración de CORS
+CORS_ALLOW_ALL_ORIGINS = os.getenv("CORS_ALLOW_ALL", "True") == "True"
 CORS_ALLOW_CREDENTIALS = True
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "file": {
+            "level": "ERROR",
+            "class": "logging.FileHandler",
+            "filename": "django_error.log",
+        },
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["file"],
+            "level": "ERROR",
+            "propagate": True,
+        },
+    },
+}
