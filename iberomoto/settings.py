@@ -10,7 +10,9 @@ load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Seguridad
-SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-#cj$4nfe#5mv2+jf39o(kun3@w1wsx+jxko#=fshcv5ye264m3")
+SECRET_KEY = os.getenv(
+    "SECRET_KEY", "django-insecure-#cj$4nfe#5mv2+jf39o(kun3@w1wsx+jxko#=fshcv5ye264m3"
+)
 DEBUG = os.getenv("DEBUG", "True") == "True"
 
 # Hosts permitidos (ajusta esto en producción)
@@ -96,7 +98,9 @@ AUTH_USER_MODEL = "accounts.CustomUser"
 
 # Validadores de contraseña
 AUTH_PASSWORD_VALIDATORS = [
-    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
+    {
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
+    },
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
@@ -110,7 +114,8 @@ USE_TZ = True
 
 # Archivos estáticos
 STATIC_URL = "static/"
-
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
 # Configuración de claves automáticas
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
@@ -138,7 +143,9 @@ SIMPLE_JWT = {
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
     "ROTATE_REFRESH_TOKENS": True,  # Regenerar refresh tokens para evitar reutilización
     "BLACKLIST_AFTER_ROTATION": True,  # Invalidar tokens antiguos
-    "SIGNING_KEY": os.getenv("JWT_SECRET", SECRET_KEY),  # Usa la clave de entorno o SECRET_KEY
+    "SIGNING_KEY": os.getenv(
+        "JWT_SECRET", SECRET_KEY
+    ),  # Usa la clave de entorno o SECRET_KEY
     "ALGORITHM": "HS256",
 }
 
@@ -164,3 +171,8 @@ LOGGING = {
         },
     },
 }
+
+AUTHENTICATION_BACKENDS = [
+    "axes.backends.AxesStandaloneBackend",  # ✅ Corrige el warning de Axes
+    "django.contrib.auth.backends.ModelBackend",  # Backend estándar de Django
+]
