@@ -1,6 +1,6 @@
 import traceback
 from django.http import JsonResponse
-from rest_framework import status
+from rest_framework import status, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.contrib.auth import get_user_model  # Importar el modelo de usuario correcto
@@ -54,3 +54,24 @@ class RegisterView(APIView):
         except Exception as e:
             traceback.print_exc()  # Imprime el error en la terminal
             return JsonResponse({"error": str(e)}, status=500)
+
+
+User = get_user_model()
+
+
+class ProfileView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        """
+        Retorna el perfil del usuario autenticado.
+        Se asume que usas SimpleJWT y ya estás enviando un token válido en el header.
+        """
+        user = request.user  # usuario autenticado a partir del token
+        # Devuelve los datos que quieras, por ejemplo:
+        data = {
+            "username": user.username,
+            "email": user.email,
+            "image": None,  # si tu modelo tiene un campo image, p.e. user.profile_image.url
+        }
+        return Response(data, status=status.HTTP_200_OK)
