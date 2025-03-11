@@ -29,6 +29,7 @@ INSTALLED_APPS = [
     "django.contrib.gis",  # Soporte GeoDjango
     "rest_framework",
     "rest_framework_simplejwt",
+    "rest_framework_gis",
     "corsheaders",
     "axes",
     # Apps personalizadas
@@ -131,10 +132,14 @@ REST_FRAMEWORK = {
         "rest_framework.throttling.AnonRateThrottle",
         "rest_framework.throttling.UserRateThrottle",
     ],
-    "DEFAULT_THROTTLE_RATES": {
-        "anon": "5/minute",  # Máximo 5 intentos por minuto
-        "user": "10/minute",
-    },
+    "DEFAULT_RENDERER_CLASSES": [
+        "rest_framework.renderers.JSONRenderer",  # Render normal
+        # "rest_framework_gis.renderers.GeoJSONRenderer",  # Render GeoJSON
+    ],
+    # "DEFAULT_THROTTLE_RATES": {
+    #    "anon": "5/minute",  # Máximo 5 intentos por minuto
+    #    "user": "10/minute",
+    # },
 }
 
 # Configuración de SimpleJWT

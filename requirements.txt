@@ -6,10 +6,11 @@ djangorestframework-simplejwt
 PyJWT
 pytz
 sqlparse
-psycopg2-binary
+psycopg2
 python-dotenv
 Pillow
 django-axes
+djangorestframework-gis
 
 # Paquetes recomendados para manejo geoespacial y/o geocodificación:
 shapely     # para operaciones geométricas (distancias, intersecciones, etc.)
