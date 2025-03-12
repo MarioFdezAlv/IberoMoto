@@ -11,6 +11,7 @@ python-dotenv
 Pillow
 django-axes
 djangorestframework-gis
+ffmpeg-python
 
 # Paquetes recomendados para manejo geoespacial y/o geocodificación:
 shapely     # para operaciones geométricas (distancias, intersecciones, etc.)

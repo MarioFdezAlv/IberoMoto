@@ -181,3 +181,6 @@ AUTHENTICATION_BACKENDS = [
     "axes.backends.AxesStandaloneBackend",  # ✅ Corrige el warning de Axes
     "django.contrib.auth.backends.ModelBackend",  # Backend estándar de Django
 ]
+
+MEDIA_URL = "/media/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
