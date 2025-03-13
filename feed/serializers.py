@@ -1,21 +1,35 @@
-# serializers.py
 from rest_framework import serializers
+from django.conf import settings
 from .models import Post
-from accounts.models import CustomUser
 
 
 class PostSerializer(serializers.ModelSerializer):
-    # Con esta línea tomas el valor 'username' del campo user
     user_username = serializers.CharField(source="user.username", read_only=True)
+    video = serializers.SerializerMethodField()
 
     class Meta:
         model = Post
         fields = [
             "id",
-            "user",  # esto seguirá devolviendo el id del usuario
-            "user_username",  # este nuevo campo mostrará el nombre del usuario
+            "user",
+            "user_username",
             "content",
             "created_at",
             "image",
             "video",
         ]
+
+    def get_video(self, obj):
+        """
+        Genera la URL completa del video.
+        """
+        if obj.video:
+            request = self.context.get("request")
+            video_url = obj.video.url  # Esto da la URL relativa
+
+            # Devuelve la URL completa dependiendo de si hay request
+            if request:
+                return request.build_absolute_uri(video_url)
+            return f"{settings.MEDIA_URL}{video_url}"  # Devuelve la URL completa si no hay request
+
+        return None

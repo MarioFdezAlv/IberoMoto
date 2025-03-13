@@ -1,6 +1,7 @@
 from pathlib import Path
 from datetime import timedelta
 import os
+import mimetypes
 from dotenv import load_dotenv
 
 # Cargar variables de entorno
@@ -16,7 +17,7 @@ SECRET_KEY = os.getenv(
 DEBUG = os.getenv("DEBUG", "True") == "True"
 
 # Hosts permitidos (ajusta esto en producción)
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
+ALLOWED_HOSTS = ["*"]
 
 # Aplicaciones instaladas
 INSTALLED_APPS = [
@@ -47,7 +48,7 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "corsheaders.middleware.CorsMiddleware",
-    "django.middleware.common.CommonMiddleware",
+    "django.middleware.common.CommonMiddleware",  # Necesario para Range Requests
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
@@ -117,6 +118,7 @@ USE_TZ = True
 STATIC_URL = "static/"
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
+
 # Configuración de claves automáticas
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
@@ -133,31 +135,41 @@ REST_FRAMEWORK = {
         "rest_framework.throttling.UserRateThrottle",
     ],
     "DEFAULT_RENDERER_CLASSES": [
-        "rest_framework.renderers.JSONRenderer",  # Render normal
-        # "rest_framework_gis.renderers.GeoJSONRenderer",  # Render GeoJSON
+        "rest_framework.renderers.JSONRenderer",
     ],
-    # "DEFAULT_THROTTLE_RATES": {
-    #    "anon": "5/minute",  # Máximo 5 intentos por minuto
-    #    "user": "10/minute",
-    # },
 }
 
 # Configuración de SimpleJWT
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
-    "ROTATE_REFRESH_TOKENS": True,  # Regenerar refresh tokens para evitar reutilización
-    "BLACKLIST_AFTER_ROTATION": True,  # Invalidar tokens antiguos
-    "SIGNING_KEY": os.getenv(
-        "JWT_SECRET", SECRET_KEY
-    ),  # Usa la clave de entorno o SECRET_KEY
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
+    "SIGNING_KEY": os.getenv("JWT_SECRET", SECRET_KEY),
     "ALGORITHM": "HS256",
 }
 
 # Configuración de CORS
-CORS_ALLOW_ALL_ORIGINS = os.getenv("CORS_ALLOW_ALL", "True") == "True"
+CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:19006",  # Expo en el navegador
+    "http://192.168.1.169:8000",  # IP local del backend
+]
+CORS_ALLOW_HEADERS = [
+    "content-type",
+    "authorization",
+    "accept",
+    "x-requested-with",
+    "range",
+]
 
+# Configuración de Content-Type y Range Requests para servir videos correctamente
+SECURE_CONTENT_TYPE_NOSNIFF = False
+mimetypes.add_type("video/mp4", ".mp4", True)
+mimetypes.add_type("video/quicktime", ".mov", True)
+
+# LOGGING
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
@@ -178,9 +190,10 @@ LOGGING = {
 }
 
 AUTHENTICATION_BACKENDS = [
-    "axes.backends.AxesStandaloneBackend",  # ✅ Corrige el warning de Axes
-    "django.contrib.auth.backends.ModelBackend",  # Backend estándar de Django
+    "axes.backends.AxesStandaloneBackend",
+    "django.contrib.auth.backends.ModelBackend",
 ]
 
+# Archivos multimedia
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
