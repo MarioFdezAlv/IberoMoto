@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from django.conf import settings
 from .models import Post
+from django.urls import reverse
 
 
 class PostSerializer(serializers.ModelSerializer):
@@ -20,16 +21,10 @@ class PostSerializer(serializers.ModelSerializer):
         ]
 
     def get_video(self, obj):
-        """
-        Genera la URL completa del video.
-        """
         if obj.video:
             request = self.context.get("request")
-            video_url = obj.video.url  # Esto da la URL relativa
-
-            # Devuelve la URL completa dependiendo de si hay request
-            if request:
-                return request.build_absolute_uri(video_url)
-            return f"{settings.MEDIA_URL}{video_url}"  # Devuelve la URL completa si no hay request
-
+            # Remover el prefijo MEDIA_URL para obtener la ruta relativa correcta
+            relative_path = obj.video.url.replace(settings.MEDIA_URL, "")
+            video_url = reverse("stream_video", kwargs={"path": relative_path})
+            return request.build_absolute_uri(video_url) if request else video_url
         return None

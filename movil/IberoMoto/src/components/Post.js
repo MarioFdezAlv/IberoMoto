@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from "react";
 import { View, Text, Image, StyleSheet, ActivityIndicator } from "react-native";
-import { Video } from "expo-video"; // ✅ Importación correcta
+import { Video } from "expo-av";
 
 const Post = ({ user_username, content, created_at, image, video }) => {
   const videoRef = useRef(null);
@@ -41,11 +41,15 @@ const Post = ({ user_username, content, created_at, image, video }) => {
             source={{ uri: video }}
             style={styles.video}
             resizeMode="contain"
-            loop
+            isLooping
+            shouldPlay
+            useNativeControls
+            onLoadStart={() => setIsLoading(true)}
             onLoad={() => setIsLoading(false)}
-            onError={(error) =>
-              console.error("❌ Error cargando video:", error)
-            }
+            onError={(error) => {
+              setIsLoading(false);
+              console.error("❌ Error cargando video:", error);
+            }}
           />
         </View>
       )}

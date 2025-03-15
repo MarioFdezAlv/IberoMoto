@@ -6,8 +6,9 @@ import {
   ActivityIndicator,
   Alert,
   RefreshControl,
+  Text,
 } from "react-native";
-import Post from "../components/Post"; // ✅ Asegúrate de que la ruta es correcta
+import Post from "../components/Post"; // Ruta corregida si es necesario
 
 const API_URL = "http://192.168.1.169:8000/feed/posts/";
 
@@ -28,7 +29,7 @@ const FeedScreen = () => {
 
       const data = await response.json();
 
-      // ✅ Asegurar que la URL del video es absoluta
+      // Asegurar que las URLs sean absolutas
       const processedPosts = data.map((post) => ({
         ...post,
         video:
