@@ -4,6 +4,7 @@ import os
 from django.conf import settings
 from .models import Post
 from .serializers import PostSerializer
+from rest_framework.permissions import IsAuthenticated
 
 
 class PostViewSet(viewsets.ModelViewSet):
@@ -65,3 +66,20 @@ def stream_video(request, path):
         f'inline; filename="{os.path.basename(file_path)}"'
     )
     return response
+
+
+class UserPostsViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    Vista para obtener los posts de un usuario autenticado.
+    """
+
+    serializer_class = PostSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        if not user.is_authenticated:
+            return (
+                Post.objects.none()
+            )  # No devolver nada si el usuario no está autenticado
+        return Post.objects.filter(user=user).order_by("-created_at")

@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import Post from "../components/Post"; // Ruta corregida si es necesario
 
-const API_URL = "http://192.168.1.169:8000/feed/posts/";
+const API_URL = "http://192.168.1.169:8000/api/feed/posts/";
 
 const FeedScreen = () => {
   const [posts, setPosts] = useState([]);
@@ -25,11 +25,19 @@ const FeedScreen = () => {
     try {
       setLoading(true);
       const response = await fetch(API_URL);
-      if (!response.ok) throw new Error("Error al obtener los posts");
 
-      const data = await response.json();
+      // Verifica el content-type antes de parsear
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new Error("La respuesta no es JSON válida");
+      }
 
-      // Asegurar que las URLs sean absolutas
+      const text = await response.text(); // Obtén el texto sin parsear aún
+      console.log("📌 Respuesta en texto:", text);
+
+      const data = JSON.parse(text); // Ahora sí parseamos
+      console.log("📌 JSON final:", data);
+
       const processedPosts = data.map((post) => ({
         ...post,
         video:
@@ -38,11 +46,10 @@ const FeedScreen = () => {
             : post.video,
       }));
 
-      console.log("📌 Posts procesados:", processedPosts);
       setPosts(processedPosts);
     } catch (error) {
       Alert.alert("Error", "No se pudieron cargar los posts.");
-      console.error(error);
+      console.error("Error en fetch:", error);
     } finally {
       setLoading(false);
     }

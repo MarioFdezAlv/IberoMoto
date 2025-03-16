@@ -1,4 +1,5 @@
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, permissions
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
@@ -91,3 +92,14 @@ class RouteViewSet(viewsets.ModelViewSet):
 
         serializer = self.get_serializer(route)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class UserRoutesViewSet(viewsets.ReadOnlyModelViewSet):
+    serializer_class = RouteSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        print(
+            f"👤 Usuario autenticado: {self.request.user}"
+        )  # 🔍 Verificar usuario autenticado
+        return Route.objects.filter(user=self.request.user).order_by("-created_at")

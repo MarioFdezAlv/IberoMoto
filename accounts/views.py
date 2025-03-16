@@ -72,6 +72,8 @@ class ProfileView(APIView):
         data = {
             "username": user.username,
             "email": user.email,
-            "image": None,  # si tu modelo tiene un campo image, p.e. user.profile_image.url
+            "profile_image": (
+                user.profile_image.url if user.profile_image else None
+            ),  # Asegurar que se envía la URL
         }
         return Response(data, status=status.HTTP_200_OK)
