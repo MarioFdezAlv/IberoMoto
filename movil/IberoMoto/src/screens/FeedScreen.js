@@ -42,7 +42,7 @@ const FeedScreen = () => {
         ...post,
         video:
           post.video && post.video.startsWith("/")
-            ? `http://192.168.1.169:8000${post.video}`
+            ? `http://172.20.10.6:8000${post.video}`
             : post.video,
       }));
 

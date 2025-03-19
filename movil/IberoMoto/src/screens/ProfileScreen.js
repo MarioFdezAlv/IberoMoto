@@ -1,3 +1,4 @@
+// src/screens/ProfileScreen.js
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -6,185 +7,128 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
+  Button,
 } from "react-native";
-import { useAuth } from "../auth/AuthContext";
-import { MaterialIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-import { SceneMap, TabView, TabBar } from "react-native-tab-view";
-import { PostContext } from "../context/PostContext";
-import { RouteContext } from "../context/RouteContext";
-import PostProfile from "../components/PostProfile";
-import RouteProfile from "../components/RouteProfile";
+import { MaterialIcons } from "@expo/vector-icons";
+import { useAuth } from "../auth/AuthContext";
+
+// Importamos los componentes que hicimos en archivos separados
+import PostsProfile from "../components/PostsProfile";
+import RoutesProfile from "../components/RoutesProfile";
+
+// Ajusta a tu IP/URL:
+const BASE_URL = "http://192.168.1.169:8000";
 
 const ProfileScreen = () => {
   const navigation = useNavigation();
   const { getToken, clearToken } = useAuth();
-  const [userData, setUserData] = useState(null);
-  const [posts, setPosts] = useState([]);
-  const [routes, setRoutes] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [index, setIndex] = useState(0);
-  const [refreshKey, setRefreshKey] = useState(0);
 
+  const [userData, setUserData] = useState(null);
+  const [loadingProfile, setLoadingProfile] = useState(true);
+
+  // Este estado controla cuál de las dos vistas mostramos
+  const [showPosts, setShowPosts] = useState(true);
+
+  // Cargamos el perfil al montar
   useEffect(() => {
-    const fetchProfile = async () => {
-      let token = await getToken();
+    const loadProfile = async () => {
+      const token = await getToken();
       if (!token) {
         navigation.navigate("Login");
         return;
       }
-
       try {
-        setLoading(true);
-        const profileResponse = await fetch(
-          "http://192.168.1.169:8000/api/profile/",
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-
-        if (profileResponse.ok) {
-          setUserData(await profileResponse.json());
+        const res = await fetch(`${BASE_URL}/api/profile/`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) {
+          console.log("Error al cargar perfil:", res.status, await res.text());
+          return;
         }
+        const data = await res.json();
+        console.log("Perfil:", data);
+        setUserData({
+          ...data,
+          profile_image: data.profile_image
+            ? `${BASE_URL}${data.profile_image}`
+            : null,
+        });
       } catch (error) {
-        console.error("❌ Error obteniendo datos del perfil:", error);
+        console.log("Error al cargar perfil:", error);
       } finally {
-        setLoading(false);
+        setLoadingProfile(false);
       }
     };
-
-    fetchProfile();
+    loadProfile();
   }, []);
 
-  const loadPosts = async () => {
-    let token = await getToken();
-    try {
-      setLoading(true);
-      const postsResponse = await fetch(
-        "http://192.168.1.169:8000/api/feed/user/posts/",
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+  // Mientras cargamos perfil
+  if (loadingProfile) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#E63946" />
+      </View>
+    );
+  }
 
-      if (postsResponse.ok) {
-        const postsData = await postsResponse.json();
-        console.log("✅ Posts cargados:", postsData);
-        setPosts(Array.isArray(postsData) ? postsData : []);
-      } else {
-        setPosts([]); // 🔥 Asegurar que se actualiza aunque falle la petición
-      }
-    } catch (error) {
-      console.error("❌ Error obteniendo posts:", error);
-      setPosts([]); // 🔥 Evitar que el estado se quede atrapado
-    } finally {
-      console.log("✅ Finalizando carga de posts");
-      setLoading(false); // 🔥 Asegurar que la carga termina
-    }
-  };
-
-  const loadRoutes = async () => {
-    let token = await getToken();
-    try {
-      setLoading(true);
-      const routesResponse = await fetch(
-        "http://192.168.1.169:8000/api/user/routes/",
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
-      if (routesResponse.ok) {
-        const routesData = await routesResponse.json();
-        console.log("📍 Rutas cargadas:", routesData);
-        setRoutes(
-          Array.isArray(routesData.features) ? routesData.features : []
-        );
-      } else {
-        setRoutes([]); // 🔥 Asegurar que se actualiza aunque falle la petición
-      }
-    } catch (error) {
-      console.error("❌ Error obteniendo rutas:", error);
-      setRoutes([]); // 🔥 Evitar que el estado se quede atrapado
-    } finally {
-      console.log("✅ Finalizando carga de rutas");
-      setLoading(false); // 🔥 Asegurar que la carga termina
-    }
-  };
-
-  const handleTabChange = (newIndex) => {
-    setIndex(newIndex);
-
-    if (newIndex === 0) {
-      console.log("📝 Cargando Posts - Eliminando Rutas...");
-      setRoutes([]); // 🔥 Limpia rutas solo cuando se entra en Posts
-      loadPosts();
-    } else if (newIndex === 1) {
-      console.log("📍 Cargando Rutas - Eliminando Posts...");
-      setPosts([]); // 🔥 Limpia posts solo cuando se entra en Rutas
-      loadRoutes();
-    }
-
-    setRefreshKey((prev) => prev + 1); // 🔥 Forzar re-render
-  };
-
+  // Render principal
   return (
-    <PostContext.Provider value={{ posts, setPosts }}>
-      <RouteContext.Provider value={{ routes, setRoutes }}>
-        <View style={styles.container}>
-          <TouchableOpacity style={styles.logoutButton} onPress={clearToken}>
-            <MaterialIcons name="logout" size={24} color="white" />
-          </TouchableOpacity>
+    <View style={styles.container}>
+      <TouchableOpacity style={styles.logoutButton} onPress={clearToken}>
+        <MaterialIcons name="logout" size={24} color="white" />
+      </TouchableOpacity>
 
-          <View style={styles.profileHeader}>
-            <Image
-              source={{
-                uri:
-                  userData?.profile_image || "https://via.placeholder.com/100",
-              }}
-              style={styles.profileImage}
-            />
-            <Text style={styles.username}>
-              {userData?.first_name || userData?.username || "Cargando..."}
-            </Text>
-          </View>
+      {/* Cabecera de perfil */}
+      <View style={styles.profileHeader}>
+        <Image
+          source={{
+            uri: userData?.profile_image || "https://via.placeholder.com/100",
+          }}
+          style={styles.profileImage}
+        />
+        <Text style={styles.username}>
+          {userData?.first_name || userData?.username || "Cargando..."}
+        </Text>
+      </View>
 
-          <TabView
-            key={refreshKey} // 🔥 Forzar render después de cambio de pestaña
-            navigationState={{
-              index,
-              routes: [
-                { key: "posts", title: "Posts" },
-                { key: "rutas", title: "Rutas" },
-              ],
-            }}
-            renderScene={({ route }) => {
-              if (route.key === "posts") return <PostProfile />;
-              if (route.key === "rutas") return <RouteProfile />;
-              return null;
-            }}
-            onIndexChange={handleTabChange}
-            renderTabBar={(props) => (
-              <TabBar
-                {...props}
-                style={styles.tabBar}
-                indicatorStyle={styles.indicator}
-                labelStyle={styles.tabLabel}
-              />
-            )}
-          />
-        </View>
-      </RouteContext.Provider>
-    </PostContext.Provider>
+      {/* Dos botones para cambiar la vista */}
+      <View style={styles.buttonRow}>
+        <Button
+          title="Ver Posts"
+          onPress={() => setShowPosts(true)}
+          color="#E63946"
+        />
+        <Button
+          title="Ver Rutas"
+          onPress={() => setShowPosts(false)}
+          color="#E63946"
+        />
+      </View>
+
+      {/* Según el estado showPosts, montamos <PostsProfile /> o <RoutesProfile /> */}
+      {showPosts ? <PostsProfile /> : <RoutesProfile />}
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
+  //////////////////////////////////////////////////
+  // LAYOUT GENERAL
   container: {
     flex: 1,
     backgroundColor: "#121212",
     padding: 10,
   },
+  loadingContainer: {
+    flex: 1,
+    backgroundColor: "#121212",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  //////////////////////////////////////////////////
+  // PERFIL
   profileHeader: {
     alignItems: "center",
     marginBottom: 10,
@@ -208,21 +152,19 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 8,
   },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#121212",
+
+  //////////////////////////////////////////////////
+  // BOTONES
+  buttonRow: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    marginBottom: 10,
   },
-  tabBar: {
-    backgroundColor: "#222",
-  },
-  indicator: {
-    backgroundColor: "#E63946",
-  },
-  tabLabel: {
-    color: "#FFF",
-    fontWeight: "bold",
+  //////////////////////////////////////////////////
+  // TEXTOS
+  noDataText: {
+    color: "#A8A8A8",
+    fontSize: 16,
   },
 });
 
