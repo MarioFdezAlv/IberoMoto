@@ -1,4 +1,3 @@
-// src/screens/ProfileScreen.js
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -13,9 +12,12 @@ import { useNavigation } from "@react-navigation/native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useAuth } from "../auth/AuthContext";
 
-// Importamos los componentes que hicimos en archivos separados
+// Importamos los componentes
 import PostsProfile from "../components/PostsProfile";
 import RoutesProfile from "../components/RoutesProfile";
+
+// Importa la imagen local por defecto
+const defaultUserImage = require("../../assets/user.jpg");
 
 // Ajusta a tu IP/URL:
 const BASE_URL = "http://192.168.1.169:8000";
@@ -72,7 +74,12 @@ const ProfileScreen = () => {
     );
   }
 
-  // Render principal
+  // Determina la fuente de la imagen de perfil: si no existe userData.profile_image,
+  // usamos la imagen local por defecto
+  const profileSource = userData?.profile_image
+    ? { uri: userData.profile_image }
+    : defaultUserImage;
+
   return (
     <View style={styles.container}>
       <TouchableOpacity style={styles.logoutButton} onPress={clearToken}>
@@ -81,12 +88,7 @@ const ProfileScreen = () => {
 
       {/* Cabecera de perfil */}
       <View style={styles.profileHeader}>
-        <Image
-          source={{
-            uri: userData?.profile_image || "https://via.placeholder.com/100",
-          }}
-          style={styles.profileImage}
-        />
+        <Image source={profileSource} style={styles.profileImage} />
         <Text style={styles.username}>
           {userData?.first_name || userData?.username || "Cargando..."}
         </Text>
@@ -106,7 +108,7 @@ const ProfileScreen = () => {
         />
       </View>
 
-      {/* Según el estado showPosts, montamos <PostsProfile /> o <RoutesProfile /> */}
+      {/* Según showPosts, montamos <PostsProfile /> o <RoutesProfile /> */}
       {showPosts ? <PostsProfile /> : <RoutesProfile />}
     </View>
   );
@@ -136,6 +138,7 @@ const styles = StyleSheet.create({
   profileImage: {
     width: 100,
     height: 100,
+    // Para que sea circular
     borderRadius: 50,
   },
   username: {

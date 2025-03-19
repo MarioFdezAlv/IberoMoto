@@ -2,7 +2,17 @@ import React, { useRef, useEffect, useState } from "react";
 import { View, Text, Image, StyleSheet, ActivityIndicator } from "react-native";
 import { Video } from "expo-av";
 
-const Post = ({ user_username, content, created_at, image, video }) => {
+// Importa la imagen local por defecto
+const defaultUserImage = require("../../assets/user.jpg");
+
+const Post = ({
+  user_username,
+  user_profile_image,
+  content,
+  created_at,
+  image,
+  video,
+}) => {
   const videoRef = useRef(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -10,14 +20,17 @@ const Post = ({ user_username, content, created_at, image, video }) => {
     console.log("🎥 Intentando cargar video desde:", video);
   }, [video]);
 
+  // Determina la fuente de la imagen de perfil: si no existe user_profile_image,
+  // se recurre a la imagen local por defecto
+  const profileSource = user_profile_image
+    ? { uri: user_profile_image }
+    : defaultUserImage;
+
   return (
     <View style={styles.postContainer}>
       {/* Encabezado del Post */}
       <View style={styles.header}>
-        <Image
-          source={{ uri: "https://via.placeholder.com/50" }}
-          style={styles.avatar}
-        />
+        <Image source={profileSource} style={styles.avatar} />
         <View>
           <Text style={styles.userName}>{user_username}</Text>
           <Text style={styles.date}>
@@ -75,6 +88,7 @@ const styles = StyleSheet.create({
   avatar: {
     width: 40,
     height: 40,
+    // Para que sea circular, debe ser la mitad del ancho/alto
     borderRadius: 20,
     marginRight: 10,
   },

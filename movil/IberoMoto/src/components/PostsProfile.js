@@ -8,7 +8,7 @@ import {
   StyleSheet,
 } from "react-native";
 import { useAuth } from "../auth/AuthContext";
-import Post from "./Post"; // <-- Importa tu nuevo componente Post
+import Post from "./Post"; // Se importa el nuevo componente Post
 
 // Ajusta la IP/URL a tu backend
 const BASE_URL = "http://192.168.1.169:8000";
@@ -38,7 +38,7 @@ const PostProfile = () => {
         }
         const data = await res.json();
         console.log("Posts data:", data);
-        // 'data' se asume que es un array
+        // 'data' se asume que es un array con user_profile_image
         setPosts(data);
       } catch (error) {
         console.log("Error al cargar posts:", error);
@@ -73,6 +73,7 @@ const PostProfile = () => {
         renderItem={({ item }) => (
           <Post
             user_username={item.user_username}
+            user_profile_image={item.user_profile_image} // <--- AQUÍ
             content={item.content}
             created_at={item.created_at}
             image={item.image}
