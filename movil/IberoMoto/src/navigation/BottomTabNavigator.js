@@ -1,23 +1,23 @@
+// src/navigation/BottomTabNavigator.js
 import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NavigationContainer } from "@react-navigation/native";
 import FeedScreen from "../screens/FeedScreen";
-import RoutesScreen from "../screens/RoutesScreen";
 import ProfileScreen from "../screens/ProfileScreen";
 import LoginScreen from "../screens/LoginScreen";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useAuth } from "../auth/AuthContext";
+
+// 🔸 Importa el Stack de rutas
+import RoutesStackNavigator from "./RoutesStackNavigator";
 
 const Tab = createBottomTabNavigator();
 
 const BottomTabNavigator = () => {
   const { authToken, loading } = useAuth();
 
-  console.log("🟡 Estado actual de authToken:", authToken);
-
   if (loading) {
-    console.log("⏳ Esperando que termine la carga de authToken...");
-    return null; // 🔹 Evita que la app se renderice antes de verificar el token
+    return null; // o algún indicador de carga
   }
 
   return (
@@ -39,7 +39,12 @@ const BottomTabNavigator = () => {
         })}
       >
         <Tab.Screen name="Feed" component={FeedScreen} />
-        <Tab.Screen name="Routes" component={RoutesScreen} />
+        {/* Cambiamos la pantalla de rutas por la Stack */}
+        <Tab.Screen
+          name="Routes"
+          component={RoutesStackNavigator}
+          options={{ headerShown: false }}
+        />
         <Tab.Screen
           name="Profile"
           component={authToken ? ProfileScreen : LoginScreen}

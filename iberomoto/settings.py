@@ -197,3 +197,5 @@ AUTHENTICATION_BACKENDS = [
 # Archivos multimedia
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+
+MAPBOX_ACCESS_TOKEN = os.environ.get("MAPBOX_ACCESS_TOKEN")
