@@ -9,7 +9,7 @@ const RoutesScreen = () => {
   useEffect(() => {
     const fetchRoutes = async () => {
       try {
-        const response = await fetch("http://192.168.1.169:8000/api/routes/");
+        const response = await fetch("http://172.20.10.6:8000/api/routes/");
         const data = await response.json();
         setRoutes(data.features || data);
       } catch (error) {

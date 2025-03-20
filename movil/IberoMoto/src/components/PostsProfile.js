@@ -11,7 +11,7 @@ import { useAuth } from "../auth/AuthContext";
 import Post from "./Post"; // Se importa el nuevo componente Post
 
 // Ajusta la IP/URL a tu backend
-const BASE_URL = "http://192.168.1.169:8000";
+const BASE_URL = "http://172.20.10.6:8000";
 
 const PostProfile = () => {
   const { getToken } = useAuth();

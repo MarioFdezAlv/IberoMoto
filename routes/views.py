@@ -21,15 +21,12 @@ class RouteViewSet(viewsets.ModelViewSet):
         """
         Espera un JSON como:
         {
-          "name": "Mi ruta",
-          "description": "Probando snapping",
-          "points": [[-3.7038, 40.4168], [-3.7045, 40.4170], ...]
+        "name": "Mi ruta",
+        "description": "Probando snapping",
+        "points": [[-3.7038, 40.4168], [-3.7045, 40.4170], ...]
         }
         """
-        name = request.data.get("name")
-        description = request.data.get("description")
         points = request.data.get("points")  # debe ser un array de [lon, lat]
-
         if not points or not isinstance(points, list):
             return Response(
                 {"error": "No points provided or invalid format"}, status=400
@@ -39,14 +36,29 @@ class RouteViewSet(viewsets.ModelViewSet):
         if not snapped_geom:
             return Response({"error": "No se pudo snapear la ruta"}, status=400)
 
-        route = Route.objects.create(
-            name=name,
-            description=description,
-            geometry=snapped_geom,  # La geometría procesada por OSRM
+        # Manda la data para que el serializer maneje la creación
+        data = {
+            "name": request.data.get("name"),
+            "description": request.data.get("description"),
+            "geometry": snapped_geom,  # Pasaremos la geometría ya “snapeada”
+        }
+
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)  # Llama a serializer.save(user=??)
+        headers = self.get_success_headers(serializer.data)
+        return Response(
+            serializer.data, status=status.HTTP_201_CREATED, headers=headers
         )
 
-        serializer = self.get_serializer(route)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    def perform_create(self, serializer):
+        # Solo si el usuario está autenticado. Depende de tu permission_classes
+        if self.request.user.is_authenticated:
+            serializer.save(user=self.request.user)
+        else:
+            # Si no hay usuario, podrías forzar un user=None,
+            # pero normalmente no se recomienda permitir rutas sin usuario.
+            serializer.save()
 
     def update(self, request, *args, **kwargs):
         """

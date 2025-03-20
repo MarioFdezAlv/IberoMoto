@@ -8,9 +8,10 @@ import {
   StyleSheet,
 } from "react-native";
 import { useAuth } from "../auth/AuthContext";
+import Route from "./Route"; // <-- Importa el nuevo componente
 
 // Ajusta a tu IP/URL:
-const BASE_URL = "http://192.168.1.169:8000";
+const BASE_URL = "http://172.20.10.6:8000";
 
 const RoutesProfile = () => {
   const { getToken } = useAuth();
@@ -45,7 +46,7 @@ const RoutesProfile = () => {
       }
     };
     loadRoutes();
-  }, []);
+  }, [getToken]);
 
   if (loading) {
     return (
@@ -68,13 +69,7 @@ const RoutesProfile = () => {
       <FlatList
         data={routes}
         keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => (
-          <View style={styles.itemBox}>
-            <Text style={styles.usernameText}>
-              {item.properties?.name || "Ruta sin nombre"}
-            </Text>
-          </View>
-        )}
+        renderItem={({ item }) => <Route routeData={item} />}
       />
     </View>
   );
@@ -101,16 +96,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#121212",
     padding: 10,
-  },
-  itemBox: {
-    backgroundColor: "#1E1E1E",
-    padding: 10,
-    borderRadius: 10,
-    marginBottom: 10,
-  },
-  usernameText: {
-    color: "#E63946",
-    fontWeight: "bold",
   },
 });
 

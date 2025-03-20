@@ -20,7 +20,7 @@ import RoutesProfile from "../components/RoutesProfile";
 const defaultUserImage = require("../../assets/user.jpg");
 
 // Ajusta a tu IP/URL:
-const BASE_URL = "http://192.168.1.169:8000";
+const BASE_URL = "http://172.20.10.6:8000";
 
 const ProfileScreen = () => {
   const navigation = useNavigation();

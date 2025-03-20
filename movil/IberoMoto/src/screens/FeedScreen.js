@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import Post from "../components/Post"; // Ruta corregida si es necesario
 
-const API_URL = "http://192.168.1.169:8000/api/feed/posts/";
+const API_URL = "http://172.20.10.6:8000/api/feed/posts/";
 
 const FeedScreen = () => {
   const [posts, setPosts] = useState([]);
